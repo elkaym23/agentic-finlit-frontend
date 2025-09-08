@@ -1,0 +1,109 @@
+====================================================================================================
+PROJECT EXPORT FOR LLMs
+====================================================================================================
+
+PROJECT INFORMATION:
+--------------------------------------------------
+Project Name: agentic-finlit-frontend
+Generated On: 2025-09-08 03:34:30 (Etc/GMT+5 / GMT-05:00)
+Total Files Processed: 2
+Export Tool: Easy Whole Project to Single Text File for LLMs v1.1.0
+Tool Author: Jota / José Guilherme Pandolfi
+
+EXPORT CONFIGURATION:
+--------------------------------------------------
+Language: en
+Max File Size: 1 MB
+Include Hidden Files: false
+Output Format: both
+Notification Level: minimal
+Custom File Name Pattern: {workspaceName}-output
+
+================================================================================
+PROJECT STRUCTURE
+================================================================================
+├── 📄 requirements.txt (35 B)
+└── 📄 streamlit_app.py (536 B)
+
+================================================================================
+PROJECT STATISTICS
+================================================================================
+Total Files: 2
+Total Directories: 0
+Text Files: 2
+Binary Files: 0
+Total Size: 571 B
+
+FILE TYPES DISTRIBUTION:
+------------------------------
+.txt            : 1
+.py             : 1
+
+================================================================================
+FILE CODE CONTENTS
+================================================================================
+
+
+================================================================================
+FILE: requirements.txt
+================================================================================
+
+FILE INFORMATION:
+----------------------------------------
+Size: 35 B
+Extension: .txt
+Language: text
+Location: requirements.txt
+Relative Path: root
+Created: 2025-09-08 03:32:57 (Etc/GMT+5 / GMT-05:00)
+Modified: 2025-09-08 03:33:03 (Etc/GMT+5 / GMT-05:00)
+MD5: 06d85d5470a2fa03aad513e88471b048
+SHA256: ad938b47dde6a56978068fa7d62d4c72e456e993fbc07c1e0e4ff6d7c9696417
+Encoding: ASCII
+
+FILE CONTENT:
+----------------------------------------
+streamlit==1.36.0
+requests>=2.32
+
+================================================================================
+
+
+================================================================================
+FILE: streamlit_app.py
+================================================================================
+
+FILE INFORMATION:
+----------------------------------------
+Size: 536 B
+Extension: .py
+Language: python
+Location: streamlit_app.py
+Relative Path: root
+Created: 2025-09-08 03:34:26 (Etc/GMT+5 / GMT-05:00)
+Modified: 2025-09-08 03:34:30 (Etc/GMT+5 / GMT-05:00)
+MD5: ceeabc52d4349e64ebd168f6da372ad7
+SHA256: de765232c2ec80d227819750609e2f3eb75f22b24e6b8f9ae82e6c5bfe88f2fe
+Encoding: UTF-8
+
+FILE CONTENT:
+----------------------------------------
+import os
+import streamlit as st
+import requests
+
+st.set_page_config(page_title="Agentic FinLit Frontend", page_icon="💹", layout="centered")
+
+BACKEND_URL = os.getenv("BACKEND_URL", "").rstrip("/")
+st.title("Agentic FinLit Frontend (Starter)")
+
+if BACKEND_URL:
+    try:
+        r = requests.get(f"{BACKEND_URL}/")
+        st.success(f"Backend OK: {r.json()}")
+    except Exception as e:
+        st.error(f"Could not reach backend: {e}")
+else:
+    st.info("Set BACKEND_URL in Space secrets to ping the backend here.")
+
+================================================================================
