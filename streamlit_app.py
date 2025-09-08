@@ -1,5 +1,8 @@
-import os
+import altair as alt
+import numpy as np
+import pandas as pd
 import streamlit as st
+import os
 import requests
 
 st.set_page_config(page_title="Agentic FinLit Frontend", page_icon="💹", layout="centered")
