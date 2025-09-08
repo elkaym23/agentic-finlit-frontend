@@ -1,0 +1,618 @@
+# phase/Teacher_view/contentmanage.py
+import json
+import streamlit as st
+from datetime import datetime
+from utils import db as dbapi
+
+# ---------- small UI helpers ----------
+def _pill(text):
+    return f"<span style='background:#eef6ff;border:1px solid #cfe3ff;border-radius:999px;padding:2px 8px;font-size:12px;margin-right:6px'>{text}</span>"
+
+def _progress(val: float):
+    pct = max(0, min(100, int(round(val * 100))))
+    return f"""
+    <div style="height:8px;background:#eef2ff;border-radius:999px;overflow:hidden">
+      <div style="width:{pct}%;height:100%;background:#3b82f6"></div>
+    </div>
+    """
+
+
+# ---------- OpenAI quiz generator ----------
+def _generate_quiz_from_text(content: str, n_questions: int = 5):
+    """
+    Returns a list of dicts like:
+      {"question": "...", "options": ["A","B","C","D"], "answer_key": "B", "points": 1}
+    Uses OPENAI_API_KEY from your env.
+    """
+    system = (
+        "You are a Jamaican primary school financial literacy teacher. "
+        "Write clear multiple-choice questions (A-D) about the provided lesson content. "
+        "Keep language simple and age-appropriate. Only one correct answer per question."
+    )
+    user = (
+        f"Create {n_questions} MCQs strictly in this JSON format:\n"
+        "{\n"
+        '  \"items\":[\n'
+        '    {\"question\":\"...\", \"options\":[\"A\",\"B\",\"C\",\"D\"], \"answer_key\":\"A\"}\n'
+        "  ]\n"
+        "}\n\n"
+        "Lesson content:\n"
+        f"{content}"
+    )
+
+    def _normalize(items):
+        out = []
+        for it in (items or [])[:n_questions]:
+            q = str(it.get("question", "")).strip()
+            opts = it.get("options", [])
+            if not q or not isinstance(opts, list) or len(opts) < 2:
+                continue
+            while len(opts) < 4:
+                opts.append("Option")
+            opts = opts[:4]
+            key = str(it.get("answer_key", "A")).strip().upper()[:1]
+            if key not in ("A","B","C","D"):
+                key = "A"
+            out.append({"question": q, "options": opts, "answer_key": key, "points": 1})
+        return out
+
+    try:
+        from openai import OpenAI
+        client = OpenAI()
+
+        # 1) Preferred path: Responses API
+        try:
+            resp = client.responses.create(
+                model="gpt-4o-mini",
+                temperature=0.2,
+                response_format={"type": "json_object"},
+                input=[
+                    {"role": "system", "content": [{"type": "text", "text": system}]},
+                    {"role": "user",   "content": [{"type": "text", "text": user}]},
+                ],
+            )
+            raw = getattr(resp, "output_text", "") or ""
+            data = json.loads(raw)
+            return _normalize(data.get("items", []))
+
+        # 2) Fallback: Chat Completions
+        except Exception:
+            resp = client.chat.completions.create(
+                model="gpt-4o-mini",
+                temperature=0.2,
+                messages=[{"role":"system","content":system},{"role":"user","content":user}],
+                response_format={"type": "json_object"},
+            )
+            raw = resp.choices[0].message.content.strip()
+            data = json.loads(raw)
+            return _normalize(data.get("items", []))
+
+    except Exception as e:
+        with st.expander("Quiz generation error details"):
+            st.code(str(e))
+        st.warning("Quiz generation failed. Check API key and your openai package version.")
+        return []
+
+# ---------- Create panels ----------
+def _create_lesson_panel(teacher_id: int):
+    st.markdown("### ✍️ Create New Lesson")
+
+    classes = dbapi.list_classes_by_teacher(teacher_id)
+    class_opts = {f"{c['name']} (code {c['code']})": c["class_id"] for c in classes} if classes else {}
+
+    if "cl_topic_count" not in st.session_state:
+        st.session_state.cl_topic_count = 2  # start with two topics
+
+    # UI-manipulation buttons OUTSIDE the form
+    cols_btn = st.columns([1,1,6])
+    with cols_btn[0]:
+        if st.button("➕ Add topic", type="secondary"):
+            st.session_state.cl_topic_count = min(20, st.session_state.cl_topic_count + 1)
+            st.rerun()
+    with cols_btn[1]:
+        if st.button("➖ Remove last", type="secondary", disabled=st.session_state.cl_topic_count <= 1):
+            st.session_state.cl_topic_count = max(1, st.session_state.cl_topic_count - 1)
+            st.rerun()
+
+    with st.form("create_lesson_form", clear_on_submit=False):
+        c1, c2 = st.columns([2,1])
+        title = c1.text_input("Title", placeholder="e.g., Jamaican Money Recognition")
+        level = c2.selectbox("Level", ["beginner","intermediate","advanced"], index=0)
+        description = st.text_area("Short description")
+        subject = st.selectbox("Subject", ["numeracy","finance"], index=0)
+
+        st.markdown("#### Topics")
+        topic_rows = []
+        for i in range(1, st.session_state.cl_topic_count + 1):
+            with st.expander(f"Topic {i}", expanded=True if i <= 2 else False):
+                t = st.text_input(f"Topic {i} title", key=f"t_title_{i}")
+                b = st.text_area(f"Topic {i} content", key=f"t_body_{i}", height=150)
+                topic_rows.append((t, b))
+
+        add_summary = st.checkbox("Append a Summary section at the end", value=True)
+        summary_text = ""
+        if add_summary:
+            summary_text = st.text_area(
+                "Summary notes",
+                key="summary_notes",
+                height=120,
+                placeholder="Key ideas, local examples, common mistakes, quick recap..."
+            )
+
+        st.markdown("#### Assign to class (optional)")
+        assign_classes = st.multiselect("Choose one or more classes", list(class_opts.keys()))
+
+        st.markdown("#### Auto-generate a quiz from this lesson (optional)")
+        gen_quiz = st.checkbox("Generate a quiz from content", value=False)
+        q_count = st.slider("", 3, 10, 5)  # label empty because already described
+        
+        # ONLY keep the main submit button inside the form
+        submitted = st.form_submit_button("Create lesson", type="primary")
+
+
+    if not submitted:
+        return
+
+    # build sections payload for DB
+    sections = []
+    for t, b in topic_rows:
+        if (t or b):
+            sections.append({"title": t or "Topic", "content": b or ""})
+
+    if add_summary:
+        sections.append({
+            "title": "Summary",
+            "content": (summary_text or "Write a short recap of the most important ideas.").strip()
+        })
+
+    if not title or not sections:
+        st.error("Please add a title and at least one topic.")
+        return
+
+    # create lesson
+    lesson_id = dbapi.create_lesson(teacher_id, title, description, subject, level, sections)
+    st.success(f"✅ Lesson created (ID {lesson_id}).")
+
+    # assign to chosen classes (lesson only for now)
+    for label in assign_classes:
+        dbapi.assign_to_class(lesson_id, None, class_opts[label], teacher_id)
+
+    # auto-generate quiz
+    if gen_quiz:
+        text = "\n\n".join([s["title"] + "\n" + (s["content"] or "") for s in sections])
+        with st.spinner("Generating quiz..."):
+            items = _generate_quiz_from_text(text, n_questions=q_count)
+        if items:
+            qid = dbapi.create_quiz(lesson_id, f"{title} - Quiz", items, {})
+            st.success(f"🧠 Quiz generated and saved (ID {qid}).")
+            for label in assign_classes:
+                dbapi.assign_to_class(lesson_id, qid, class_opts[label], teacher_id)
+
+    st.session_state.show_create_lesson = False
+    st.rerun()
+
+
+
+def _create_quiz_panel(teacher_id: int):
+    st.markdown("### 🏆 Create New Quiz")
+
+    # teacher lessons to link
+    lessons = dbapi.list_lessons_by_teacher(teacher_id)
+    lesson_map = {f"{L['title']} (#{L['lesson_id']})": L["lesson_id"] for L in lessons}
+    if not lesson_map:
+        st.info("Create a lesson first, then link a quiz to it.")
+        return
+
+    # dynamic questions
+    if "cq_q_count" not in st.session_state:
+        st.session_state.cq_q_count = 5
+
+    with st.form("create_quiz_form", clear_on_submit=False):
+        c1, c2 = st.columns([2,1])
+        title = c1.text_input("Title", placeholder="e.g., Currency Basics Quiz")
+        lesson_label = c2.selectbox("Linked Lesson", list(lesson_map.keys()))
+
+        st.markdown("#### Questions (up to 10)")
+        items = []
+        for i in range(1, st.session_state.cq_q_count + 1):
+            with st.expander(f"Question {i}", expanded=(i <= 2)):
+                q = st.text_area(f"Prompt {i}", key=f"q_{i}")
+                cA, cB = st.columns(2)
+                a = cA.text_input(f"Option A (correct?)", key=f"optA_{i}")
+                b = cB.text_input(f"Option B", key=f"optB_{i}")
+                cC, cD = st.columns(2)
+                c = cC.text_input(f"Option C", key=f"optC_{i}")
+                d = cD.text_input(f"Option D", key=f"optD_{i}")
+                correct = st.radio("Correct answer", ["A","B","C","D"], index=0, key=f"ans_{i}", horizontal=True)
+                items.append({"question": q, "options": [a,b,c,d], "answer_key": correct, "points": 1})
+
+        row = st.columns([1,1,4,2])
+        with row[0]:
+            if st.form_submit_button("➕ Add question", type="secondary", disabled=st.session_state.cq_q_count >= 10):
+                st.session_state.cq_q_count = min(10, st.session_state.cq_q_count + 1)
+                st.rerun()
+        with row[1]:
+            if st.form_submit_button("➖ Remove last", type="secondary", disabled=st.session_state.cq_q_count <= 1):
+                st.session_state.cq_q_count = max(1, st.session_state.cq_q_count - 1)
+                st.rerun()
+
+        submitted = row[3].form_submit_button("Create quiz", type="primary")
+
+    if not submitted:
+        return
+    if not title:
+        st.error("Please add a quiz title.")
+        return
+
+    # sanitize items
+    cleaned = []
+    for it in items:
+        q = (it["question"] or "").strip()
+        opts = [o for o in it["options"] if (o or "").strip()]
+        if len(opts) < 2 or not q:
+            continue
+        while len(opts) < 4:
+            opts.append("Option")
+        cleaned.append({"question": q, "options": opts[:4], "answer_key": it["answer_key"], "points": 1})
+
+    if not cleaned:
+        st.error("Add at least one valid question.")
+        return
+
+    qid = dbapi.create_quiz(lesson_map[lesson_label], title, cleaned, {})
+    st.success(f"✅ Quiz created (ID {qid}).")
+
+    st.session_state.show_create_quiz = False
+    st.rerun()
+
+
+def _edit_lesson_panel(teacher_id: int, lesson_id: int):
+    data = dbapi.get_lesson(lesson_id)
+    L = data["lesson"]
+    secs = data["sections"] or []
+
+    key_cnt = f"el_cnt_{lesson_id}"
+    if key_cnt not in st.session_state:
+        st.session_state[key_cnt] = max(1, len(secs))
+
+    st.markdown("### ✏️ Edit Lesson")
+
+    #Move UI-manipulation buttons 
+    tools = st.columns([1,1,8])
+    with tools[0]:
+        if st.button("➕ Add section", key=f"el_add_{lesson_id}", use_container_width=True):
+            st.session_state[key_cnt] = min(50, st.session_state[key_cnt] + 1)
+            st.rerun()
+    with tools[1]:
+        if st.button("➖ Remove last", key=f"el_rem_{lesson_id}",
+                     disabled=st.session_state[key_cnt] <= 1, use_container_width=True):
+            st.session_state[key_cnt] = max(1, st.session_state[key_cnt] - 1)
+            st.rerun()
+
+    #  The form only has fields + a single submit (Save)
+    with st.form(f"edit_lesson_form_{lesson_id}", clear_on_submit=False):
+        c1, c2 = st.columns([2,1])
+        title = c1.text_input("Title", value=L["title"])
+        level = c2.selectbox(
+            "Level",
+            ["beginner","intermediate","advanced"],
+            index=["beginner","intermediate","advanced"].index(L["level"])
+        )
+        description = st.text_area("Short description", value=L.get("description") or "")
+        subject = st.selectbox("Subject", ["numeracy","finance"], index=(0 if L["subject"]=="numeracy" else 1))
+
+        st.markdown("#### Sections")
+        edited_sections = []
+        total = st.session_state[key_cnt]
+        for i in range(1, total + 1):
+            s = secs[i-1] if i-1 < len(secs) else {"title":"", "content":""}
+            with st.expander(f"Section {i}", expanded=(i <= 2)):
+                t = st.text_input(f"Title {i}", value=s.get("title") or "", key=f"el_t_{lesson_id}_{i}")
+                b = st.text_area(f"Content {i}", value=s.get("content") or "", height=150, key=f"el_b_{lesson_id}_{i}")
+                edited_sections.append({"title": t or "Section", "content": b or ""})
+
+        save = st.form_submit_button("💾 Save changes", type="primary", use_container_width=True)
+
+    # Cancel is a normal button outside the form
+    actions = st.columns([8,2])
+    with actions[1]:
+        cancel_clicked = st.button("✖ Cancel", key=f"el_cancel_{lesson_id}", type="secondary", use_container_width=True)
+
+    if cancel_clicked:
+        st.session_state.show_edit_lesson = False
+        st.session_state.edit_lesson_id = None
+        st.rerun()
+
+    if not save:
+        return
+
+    # validation + persist
+    if not title or not any((s["title"] or s["content"]).strip() for s in edited_sections):
+        st.error("Title and at least one non-empty section are required.")
+        return
+
+    ok = dbapi.update_lesson(lesson_id, teacher_id, title, description, subject, level, edited_sections)
+    if ok:
+        st.success("✅ Lesson updated.")
+        st.session_state.show_edit_lesson = False
+        st.session_state.edit_lesson_id = None
+        st.rerun()
+    else:
+        st.error("Could not update this lesson. Check ownership or DB errors.")
+
+
+def _edit_quiz_panel(teacher_id: int, quiz_id: int):
+    data = dbapi.get_quiz(quiz_id)  # {'quiz': {...}, 'items': [...]}
+    if not data or not data.get("quiz"):
+        st.error("Quiz not found.")
+        return
+
+    Q = data["quiz"]
+    raw_items = data.get("items", [])
+
+    def _dec(x):
+        if isinstance(x, str):
+            try:
+                return json.loads(x)
+            except Exception:
+                return x
+        return x
+
+    # Normalize into simple dicts that the form can bind to
+    items = []
+    for it in raw_items:
+        opts = _dec(it.get("options")) or []
+        while len(opts) < 4:
+            opts.append("Option")
+        opts = opts[:4]
+
+        ans = _dec(it.get("answer_key"))
+        if isinstance(ans, list) and ans:
+            ans = ans[0]
+        ans = (str(ans) or "A").upper()[:1]
+        if ans not in ("A","B","C","D"):
+            ans = "A"
+
+        items.append({
+            "question": (it.get("question") or "").strip(),
+            "options": opts,
+            "answer_key": ans,
+            "points": int(it.get("points") or 1),
+        })
+
+    key_cnt = f"eq_cnt_{quiz_id}"
+    if key_cnt not in st.session_state:
+        st.session_state[key_cnt] = max(1, len(items) or 5)
+
+    st.markdown("### ✏️ Edit Quiz")
+
+    with st.form(f"edit_quiz_form_{quiz_id}", clear_on_submit=False):
+        title = st.text_input("Title", value=Q.get("title") or f"Quiz #{quiz_id}")
+
+        edited = []
+        total = st.session_state[key_cnt]
+        for i in range(1, total + 1):
+            it = items[i-1] if i-1 < len(items) else {"question":"", "options":["","","",""], "answer_key":"A", "points":1}
+            with st.expander(f"Question {i}", expanded=(i <= 2)):
+                q = st.text_area(f"Prompt {i}", value=it["question"], key=f"eq_q_{quiz_id}_{i}")
+                cA, cB = st.columns(2)
+                a = cA.text_input(f"Option A", value=it["options"][0], key=f"eq_A_{quiz_id}_{i}")
+                b = cB.text_input(f"Option B", value=it["options"][1], key=f"eq_B_{quiz_id}_{i}")
+                cC, cD = st.columns(2)
+                c = cC.text_input(f"Option C", value=it["options"][2], key=f"eq_C_{quiz_id}_{i}")
+                d = cD.text_input(f"Option D", value=it["options"][3], key=f"eq_D_{quiz_id}_{i}")
+                correct = st.radio("Correct answer", ["A","B","C","D"],
+                                   index=["A","B","C","D"].index(it["answer_key"]),
+                                   key=f"eq_ans_{quiz_id}_{i}", horizontal=True)
+                edited.append({"question": q, "options": [a,b,c,d], "answer_key": correct, "points": 1})
+
+        row = st.columns([1,1,6,2,2])
+        with row[0]:
+            if st.form_submit_button("➕ Add question", type="secondary"):
+                st.session_state[key_cnt] = min(20, st.session_state[key_cnt] + 1)
+                st.rerun()
+        with row[1]:
+            if st.form_submit_button("➖ Remove last", type="secondary", disabled=st.session_state[key_cnt] <= 1):
+                st.session_state[key_cnt] = max(1, st.session_state[key_cnt] - 1)
+                st.rerun()
+
+        save = row[3].form_submit_button("💾 Save", type="primary")
+        cancel = row[4].form_submit_button("✖ Cancel", type="secondary")
+
+    if cancel:
+        st.session_state.show_edit_quiz = False
+        st.session_state.edit_quiz_id = None
+        st.rerun()
+
+    if not save:
+        return
+
+    # sanitize
+    cleaned = []
+    for it in edited:
+        q = (it["question"] or "").strip()
+        opts = [o for o in it["options"] if (o or "").strip()]
+        if not q or len(opts) < 2:
+            continue
+        while len(opts) < 4:
+            opts.append("Option")
+        cleaned.append({
+            "question": q,
+            "options": opts[:4],
+            "answer_key": it["answer_key"],  # single letter
+            "points": 1
+        })
+
+    if not title or not cleaned:
+        st.error("Title and at least one valid question are required.")
+        return
+
+    ok = dbapi.update_quiz(quiz_id, teacher_id, title, cleaned, settings={})
+    if ok:
+        st.success("✅ Quiz updated.")
+        st.session_state.show_edit_quiz = False
+        st.session_state.edit_quiz_id = None
+        st.rerun()
+    else:
+        st.error("Could not update this quiz. Check ownership or DB errors.")
+
+
+# ---------- Main page ----------
+def show_page():
+    user = st.session_state.user
+    teacher_id = user["user_id"]
+
+    st.title("📚 Content Management")
+    st.caption("Create and manage custom lessons and quizzes")
+
+    # preload lists
+    lessons = dbapi.list_lessons_by_teacher(teacher_id)
+    quizzes = dbapi.list_quizzes_by_teacher(teacher_id)
+
+    # top action bar (no popovers)
+    a1, a2, _sp = st.columns([3,3,4])
+    if a1.button("➕ Create Lesson", use_container_width=True):
+        st.session_state.show_create_lesson = True
+    if a2.button("🏆 Create Quiz", use_container_width=True):
+        st.session_state.show_create_quiz = True
+
+    # big inline create panels
+    if st.session_state.get("show_create_lesson"):
+        with st.container(border=True):
+            _create_lesson_panel(teacher_id)
+        st.markdown("---")
+
+    if st.session_state.get("show_create_quiz"):
+        with st.container(border=True):
+            _create_quiz_panel(teacher_id)
+        st.markdown("---")
+
+    # ----- Inline lesson edit panel, when triggered -----
+    if st.session_state.get("show_edit_lesson") and st.session_state.get("edit_lesson_id"):
+        with st.container(border=True):
+            _edit_lesson_panel(teacher_id, st.session_state.edit_lesson_id)
+        st.markdown("---")
+    # ----- Inline quiz edit panel, when triggered -----
+    if st.session_state.get("show_edit_quiz") and st.session_state.get("edit_quiz_id"):
+        with st.container(border=True):
+            _edit_quiz_panel(teacher_id, st.session_state.edit_quiz_id)
+        st.markdown("---")
+
+
+    # Tabs
+    tab1, tab2 = st.tabs([f"Custom Lessons ({len(lessons)})", f"Custom Quizzes ({len(quizzes)})"])
+
+    # ========== LESSONS ==========
+    with tab1:
+        if not lessons:
+            st.info("No lessons yet. Use **Create Lesson** above.")
+        else:
+            # all students across teacher's classes (optional “assign to students” inline UI you already had)
+            all_students = dbapi.list_all_students_for_teacher(teacher_id)
+            student_options = {f"{s['name']} · {s['email']}": s["user_id"] for s in all_students}
+
+            for L in lessons:
+                assignees = dbapi.list_assigned_students_for_lesson(L["lesson_id"])
+                assignee_names = [a["name"] for a in assignees]
+                created = L["created_at"].strftime("%Y-%m-%d") if isinstance(L["created_at"], datetime) else str(L["created_at"])[:10]
+                count = len(assignees)
+
+                with st.container(border=True):
+                    c1, c2 = st.columns([8,3])
+                    with c1:
+                        st.markdown(f"### {L['title']}")
+                        st.caption(L.get("description") or "")
+                        st.markdown(
+                            _pill(L["level"].capitalize()) +
+                            _pill(L["subject"]) +
+                            _pill(f"{count} student{'s' if count != 1 else ''} assigned") +
+                            _pill(f"Created {created}"),
+                            unsafe_allow_html=True
+                        )
+                    with c2:
+                        b1, b2 = st.columns([1,1])
+                        with b1:
+                            if st.button("Edit", key=f"edit_{L['lesson_id']}"):
+                                st.session_state.edit_lesson_id = L["lesson_id"]
+                                st.session_state.show_edit_lesson = True
+                                st.rerun()
+                        with b2:
+                            if st.button("Delete", key=f"del_{L['lesson_id']}"):
+                                ok, msg = dbapi.delete_lesson(L["lesson_id"], teacher_id)
+                                if ok: st.success("Lesson deleted"); st.rerun()
+                                else:  st.error(msg)
+
+                    st.markdown("**Assigned Students:**")
+                    if assignee_names:
+                        st.markdown(" ".join(_pill(n) for n in assignee_names), unsafe_allow_html=True)
+                    else:
+                        st.caption("No students assigned yet.")
+
+    # ========== QUIZZES ==========
+    with tab2:
+        if not quizzes:
+            st.info("No quizzes yet. Use **Create Quiz** above.")
+        else:
+            for Q in quizzes:
+                assignees = dbapi.list_assigned_students_for_quiz(Q["quiz_id"])
+                created = Q["created_at"].strftime("%Y-%m-%d") if isinstance(Q["created_at"], datetime) else str(Q["created_at"])[:10]
+                num_qs = int(Q.get("num_items", 0))
+
+                with st.container(border=True):
+                    c1, c2 = st.columns([8,3])
+                    with c1:
+                        st.markdown(f"### {Q['title']}")
+                        st.caption(f"Lesson: {Q['lesson_title']}")
+                        st.markdown(
+                            _pill(f"{num_qs} question{'s' if num_qs != 1 else ''}") +
+                            _pill(f"{len(assignees)} students assigned") +
+                            _pill(f"Created {created}"),
+                            unsafe_allow_html=True
+                        )
+                    with c2:
+                        b1, b2 = st.columns(2)
+                        with b1:
+                            if st.button("Edit", key=f"editq_{Q['quiz_id']}"):
+                                st.session_state.edit_quiz_id = Q["quiz_id"]
+                                st.session_state.show_edit_quiz = True
+                                st.rerun()
+                        with b2:
+                            if st.button("Delete", key=f"delq_{Q['quiz_id']}"):
+                                ok, msg = dbapi.delete_quiz(Q["quiz_id"], teacher_id)
+                                if ok: st.success("Quiz deleted"); st.rerun()
+                                else:  st.error(msg)
+
+                    st.markdown("**Assigned Students:**")
+                    if assignees:
+                        st.markdown(" ".join(_pill(a['name']) for a in assignees), unsafe_allow_html=True)
+                    else:
+                        st.caption("No students assigned yet.")
+
+                    with st.expander("View questions", expanded=False):
+                        data = dbapi.get_quiz(Q["quiz_id"])  # {'quiz': {...}, 'items': [...]}
+                        items = data.get("items", []) if data else []
+                        if not items:
+                            st.info("No items found for this quiz.")
+                        else:
+                            labels = ["A","B","C","D"]
+                            for i, it in enumerate(items, start=1):
+                                # Handle JSON columns that may come back as strings
+                                opts = it.get("options")
+                                if isinstance(opts, str):
+                                    try:
+                                        opts = json.loads(opts)
+                                    except Exception:
+                                        opts = [opts]
+                                answer = it.get("answer_key")
+                                if isinstance(answer, str):
+                                    try:
+                                        answer = json.loads(answer)
+                                    except Exception:
+                                        pass
+
+                                st.markdown(f"**Q{i}.** {it.get('question','').strip()}")
+                                for j, opt in enumerate((opts or [])[:4]):
+                                    st.write(f"{labels[j]}) {opt}")
+                                ans_text = answer if isinstance(answer, str) else ",".join(answer or [])
+                                st.caption(f"Answer: {ans_text}")
+                                st.markdown("---")
