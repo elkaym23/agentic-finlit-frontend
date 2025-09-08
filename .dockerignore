@@ -1,0 +1,11 @@
+# .dockerignore
+.git
+.gitignore
+.gitattributes
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+*.md
+agentic-finlit-frontend-output.*

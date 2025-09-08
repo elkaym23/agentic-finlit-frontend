@@ -5,7 +5,7 @@ PROJECT EXPORT FOR LLMs
 PROJECT INFORMATION:
 --------------------------------------------------
 Project Name: agentic-finlit-frontend
-Generated On: 2025-09-08 06:00:35 (Etc/GMT+5 / GMT-05:00)
+Generated On: 2025-09-08 06:10:12 (Etc/GMT+5 / GMT-05:00)
 Total Files Processed: 63
 Export Tool: Easy Whole Project to Single Text File for LLMs v1.1.0
 Tool Author: Jota / José Guilherme Pandolfi
@@ -96,7 +96,7 @@ PROJECT STRUCTURE
 │   ├── 📄 auth.py (386 B)
 │   ├── 📄 db.py
 │   └── 📄 state.py (305 B)
-├── 📄 Dockerfile (445 B)
+├── 📄 Dockerfile (793 B)
 ├── 📄 README.md (465 B)
 ├── 📄 requirements.txt (82 B)
 └── 📄 streamlit_app.py (12.87 KB)
