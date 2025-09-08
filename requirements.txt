@@ -2,3 +2,15 @@ streamlit==1.36.0
 python-dotenv==1.0.1
 requests>=2.32
 huggingface_hub==0.24.5
+
+
+title: Agentic Finlit Frontend
+emoji: 🚀
+colorFrom: red
+colorTo: red
+sdk: streamlit
+app_port: 8501
+app_file: streamlit
+pinned: false
+short_description: agentic-finlit-frontend
+license: unknown

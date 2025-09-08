@@ -3,7 +3,7 @@
 ## 📊 Project Information
 
 - **Project Name**: `agentic-finlit-frontend`
-- **Generated On**: 2025-09-08 06:10:12 (Etc/GMT+5 / GMT-05:00)
+- **Generated On**: 2025-09-08 20:55:14 (Etc/GMT+5 / GMT-05:00)
 - **Total Files Processed**: 63
 - **Export Tool**: Easy Whole Project to Single Text File for LLMs v1.1.0
 - **Tool Author**: Jota / José Guilherme Pandolfi
@@ -96,7 +96,7 @@
 │   └── 📄 state.py (305 B)
 ├── 📄 Dockerfile (793 B)
 ├── 📄 README.md (465 B)
-├── 📄 requirements.txt (82 B)
+├── 📄 requirements.txt (289 B)
 └── 📄 streamlit_app.py (12.87 KB)
 ```
 
@@ -6763,16 +6763,16 @@ forums](https://discuss.streamlit.io).
 ### <a id="📄-requirements-txt"></a>📄 `requirements.txt`
 
 **File Info:**
-- **Size**: 82 B
+- **Size**: 289 B
 - **Extension**: `.txt`
 - **Language**: `text`
 - **Location**: `requirements.txt`
 - **Relative Path**: `root`
 - **Created**: 2025-09-08 03:32:57 (Etc/GMT+5 / GMT-05:00)
-- **Modified**: 2025-09-08 04:36:35 (Etc/GMT+5 / GMT-05:00)
-- **MD5**: `14bcada3ffd5af15ce13e269d7f6d5f3`
-- **SHA256**: `155ef994eb6077fbf5737ef7a23233676e58a88c86e492f7214421ec06c8d324`
-- **Encoding**: ASCII
+- **Modified**: 2025-09-08 20:55:13 (Etc/GMT+5 / GMT-05:00)
+- **MD5**: `09ffd7dc8d3a4ce78e5acfcb115c5531`
+- **SHA256**: `4881181ee6c1a0e9c7aa89bdd01dc41f805cfed8c4232945824a2e43cf794c93`
+- **Encoding**: UTF-8
 
 **File code content:**
 
@@ -6782,6 +6782,17 @@ python-dotenv==1.0.1
 requests>=2.32
 huggingface_hub==0.24.5
 
+
+title: Agentic Finlit Frontend
+emoji: 🚀
+colorFrom: red
+colorTo: red
+sdk: streamlit
+app_port: 8501
+app_file: streamlit
+pinned: false
+short_description: agentic-finlit-frontend
+license: unknown
 ```
 
 ---
