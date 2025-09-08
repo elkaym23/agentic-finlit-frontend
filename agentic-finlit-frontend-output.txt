@@ -5,8 +5,8 @@ PROJECT EXPORT FOR LLMs
 PROJECT INFORMATION:
 --------------------------------------------------
 Project Name: agentic-finlit-frontend
-Generated On: 2025-09-08 04:43:32 (Etc/GMT+5 / GMT-05:00)
-Total Files Processed: 61
+Generated On: 2025-09-08 05:06:13 (Etc/GMT+5 / GMT-05:00)
+Total Files Processed: 64
 Export Tool: Easy Whole Project to Single Text File for LLMs v1.1.0
 Tool Author: Jota / José Guilherme Pandolfi
 
@@ -27,13 +27,16 @@ PROJECT STRUCTURE
 │   │   ├── 📁 jmd/
 │   │   │   ├── 📄 jmd_1.jpeg (10.73 KB)
 │   │   │   ├── 📄 jmd_10.jpeg (8.41 KB)
-│   │   │   ├── 📄 jmd_100.jpg (59.2 KB)
+│   │   │   ├── 📄 jmd_100.jpeg (59.2 KB)
+│   │   │   ├── 📄 jmd_100.jpg (130 B)
 │   │   │   ├── 📄 jmd_1000.jpeg (11.28 KB)
 │   │   │   ├── 📄 jmd_20.jpeg (7.15 KB)
 │   │   │   ├── 📄 jmd_2000.jpeg (11.85 KB)
 │   │   │   ├── 📄 jmd_5.jpeg (13.08 KB)
-│   │   │   ├── 📄 jmd_50.jpg (346.45 KB)
-│   │   │   ├── 📄 jmd_500.jpg (66.3 KB)
+│   │   │   ├── 📄 jmd_50.jpeg (346.45 KB)
+│   │   │   ├── 📄 jmd_50.jpg (131 B)
+│   │   │   ├── 📄 jmd_500.jpeg (66.3 KB)
+│   │   │   ├── 📄 jmd_500.jpg (130 B)
 │   │   │   └── 📄 jmd_5000.jpeg (11.59 KB)
 │   │   └── 📁 usd/
 │   └── 📄 styles.css (15.79 KB)
@@ -89,7 +92,7 @@ PROJECT STRUCTURE
 │       ├── 📄 contentmanage.py (25.96 KB)
 │       └── 📄 studentlist.py (6.06 KB)
 ├── 📁 src/
-│   └── 📄 streamlit_app.py (1.14 KB)
+│   └── 📄 streamlit_app.py (12.87 KB)
 ├── 📁 utils/
 │   ├── 📄 api.py (1.24 KB)
 │   ├── 📄 auth.py
@@ -103,17 +106,17 @@ PROJECT STRUCTURE
 ================================================================================
 PROJECT STATISTICS
 ================================================================================
-Total Files: 61
+Total Files: 64
 Total Directories: 16
 Text Files: 24
-Binary Files: 37
-Total Size: 1.16 MB
+Binary Files: 40
+Total Size: 1.17 MB
 
 FILE TYPES DISTRIBUTION:
 ------------------------------
 .pyc            : 26
 .py             : 20
-.jpeg           : 7
+.jpeg           : 10
 .jpg            : 3
 .txt            : 2
 .css            : 1
@@ -130,12 +133,15 @@ BINARY/EXCLUDED FILES (not included in text content)
 ================================================================================
 - assets/images/jmd/jmd_1.jpeg
 - assets/images/jmd/jmd_10.jpeg
+- assets/images/jmd/jmd_100.jpeg
 - assets/images/jmd/jmd_100.jpg
 - assets/images/jmd/jmd_1000.jpeg
 - assets/images/jmd/jmd_20.jpeg
 - assets/images/jmd/jmd_2000.jpeg
 - assets/images/jmd/jmd_5.jpeg
+- assets/images/jmd/jmd_50.jpeg
 - assets/images/jmd/jmd_50.jpg
+- assets/images/jmd/jmd_500.jpeg
 - assets/images/jmd/jmd_500.jpg
 - assets/images/jmd/jmd_5000.jpeg
 
@@ -152,7 +158,7 @@ Language: css
 Location: assets/styles.css
 Relative Path: assets
 Created: 2025-09-08 04:27:36 (Etc/GMT+5 / GMT-05:00)
-Modified: 2025-09-07 05:57:38 (Etc/GMT+5 / GMT-05:00)
+Modified: 2025-09-08 04:59:27 (Etc/GMT+5 / GMT-05:00)
 MD5: b06dfb17bb4ea35a86ffa589cb246c05
 SHA256: bb045f276edbb7cd22b52a4aa0fe81673bac9fac6489eb0703e50b0cbe5cfb38
 Encoding: ASCII
@@ -6575,16 +6581,16 @@ FILE: src/streamlit_app.py
 
 FILE INFORMATION:
 ----------------------------------------
-Size: 1.14 KB
+Size: 12.87 KB
 Extension: .py
 Language: python
 Location: src/streamlit_app.py
 Relative Path: src
 Created: 2025-09-08 03:39:31 (Etc/GMT+5 / GMT-05:00)
-Modified: 2025-09-08 03:39:31 (Etc/GMT+5 / GMT-05:00)
-MD5: e35e53b4f9f87c00481f08000154d988
-SHA256: 6a10e27767df718119a4af874cd597b38b1e46a9649f1969521c7b26f703ec82
-Encoding: ASCII
+Modified: 2025-09-08 05:06:13 (Etc/GMT+5 / GMT-05:00)
+MD5: 74b0032389fba5928c0f733d1a7c00bb
+SHA256: 6af296120bafa4bd0ca953225ad6ce1071617defb2809060ae05f5b738459a01
+Encoding: UTF-8
 
 FILE CONTENT:
 ----------------------------------------
@@ -6592,42 +6598,323 @@ import altair as alt
 import numpy as np
 import pandas as pd
 import streamlit as st
+import os
+import requests
 
-"""
-# Welcome to Streamlit!
+st.set_page_config(page_title="Agentic FinLit Frontend", page_icon="💹", layout="centered")
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+BACKEND_URL = os.getenv("BACKEND_URL", "").rstrip("/")
+st.title("Agentic FinLit Frontend (Starter)")
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+if BACKEND_URL:
+    try:
+        r = requests.get(f"{BACKEND_URL}/")
+        st.success(f"Backend OK: {r.json()}")
+    except Exception as e:
+        st.error(f"Could not reach backend: {e}")
+else:
+    st.info("Set BACKEND_URL in Space secrets to ping the backend here.")
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
+from dashboards import student_db,teacher_db
+from phase.Student_view import chatbot, lesson, quiz, game, teacherlink
+from phase.Teacher_view import classmanage,studentlist,contentmanage
+from phase.Student_view.games import profitpuzzle
+from utils import db
+import os
+from dotenv import load_dotenv
 
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
 
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
+load_dotenv()
 
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+
+# --- SESSION STATE INITIALIZATION ---
+for key, default in [("user", None), ("current_page", "Welcome"),
+                     ("xp", 2450), ("streak", 7), ("current_game", None),
+                     ("temp_user", None)]:
+    if key not in st.session_state:
+        st.session_state[key] = default
+
+# --- NAVIGATION ---
+def setup_navigation():
+    if st.session_state.user:
+        public_pages = ["Welcome", "Login"]
+    else:
+        public_pages = ["Welcome", "Signup", "Login"]
+
+    nav_choice = st.sidebar.selectbox(
+        "Go to",
+        public_pages,
+        index=public_pages.index(st.session_state.current_page) if st.session_state.current_page in public_pages else 0
+    )
+
+    # --- if quiz is in progress, show progress tracker ---
+    if st.session_state.get("current_page") == "Quiz":
+        qid = st.session_state.get("selected_quiz")
+        if qid is not None:
+            try:
+                quiz.show_quiz_progress_sidebar(qid)  # renders into sidebar
+            except Exception:
+                pass
+
+        
+    # --- if profit puzzle game is in progress, show progress tracker ---
+    if (
+        st.session_state.get("current_page") == "Game"
+        and st.session_state.get("current_game") == "profit_puzzle"
+    ):
+        profitpuzzle.show_profit_progress_sidebar()
+
+    # Only override if user is already on a public page
+    if st.session_state.current_page in public_pages:
+        st.session_state.current_page = nav_choice
+
+    if st.session_state.user:
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("Dashboard")
+        role = st.session_state.user["role"]
+
+        if role == "Student":
+            if st.sidebar.button("📊 Student Dashboard"):
+                st.session_state.current_page = "Student Dashboard"
+            if st.sidebar.button("📘 Lessons"):
+                st.session_state.current_page = "Lessons"
+            if st.sidebar.button("📝 Quiz"):
+                st.session_state.current_page = "Quiz"
+            if st.sidebar.button("💬 Chatbot"):
+                st.session_state.current_page = "Chatbot"
+            if st.sidebar.button("🏆 Game"):
+                st.session_state.current_page = "Game"
+            if st.sidebar.button("⌨️​ Teacher Link"):
+                st.session_state.current_page = "Teacher Link"
+
+        elif role == "Teacher":
+            if st.sidebar.button("📚 Teacher Dashboard"):
+                st.session_state.current_page = "Teacher Dashboard"
+            if st.sidebar.button("Class management"):
+                st.session_state.current_page = "Class management"
+            if st.sidebar.button("Students List"):
+                st.session_state.current_page = "Students List"
+            if st.sidebar.button("Content Management"):
+                st.session_state.current_page = "Content Management"
+
+        if st.sidebar.button("Logout"):
+            st.session_state.user = None
+            st.session_state.current_page = "Welcome"
+            st.rerun()
+
+
+# --- ROUTING ---
+def main():
+    setup_navigation()
+    page = st.session_state.current_page
+
+    # --- WELCOME PAGE ---
+    if page == "Welcome":
+        st.title("💹 Welcome to FinEdu App")
+        if st.session_state.user:
+            st.success(f"Welcome back, {st.session_state.user['name']}! ✅")
+        st.write(
+            "This app helps you improve your **financial education and numeracy skills**.  \n"
+            "👉 Use the sidebar to **Signup** or **Login** to get started."
+        )
+
+    # --- SIGNUP PAGE ---
+    elif page == "Signup":
+        st.title("📝 Signup")
+
+        # remember the picked role between reruns
+        if "signup_role" not in st.session_state:
+            st.session_state.signup_role = None
+
+        if st.session_state.user:
+            st.success(f"Already logged in as {st.session_state.user['name']}.")
+            st.stop()
+
+        # Step 1: choose role
+        if not st.session_state.signup_role:
+            st.subheader("Who are you signing up as?")
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button("👩‍🎓 Student", use_container_width=True):
+                    st.session_state.signup_role = "Student"
+                    st.rerun()
+            with c2:
+                if st.button("👨‍🏫 Teacher", use_container_width=True):
+                    st.session_state.signup_role = "Teacher"
+                    st.rerun()
+
+            st.info("Pick your role to continue with the correct form.")
+            st.stop()
+
+        role = st.session_state.signup_role
+
+        # Step 2a: Student form
+        if role == "Student":
+            st.subheader("Student Signup")
+            with st.form("student_signup_form", clear_on_submit=False):
+                name = st.text_input("Full Name")
+                email = st.text_input("Email")
+                password = st.text_input("Password", type="password")
+                country = st.selectbox("Country", ["Jamaica", "USA", "UK", "India", "Canada", "Other"])
+                level = st.selectbox("Level", ["Beginner", "Intermediate", "Advanced"])
+                submitted = st.form_submit_button("Create Student Account")
+
+                if submitted:
+                    if not (name.strip() and email.strip() and password.strip()):
+                        st.error("⚠️ Please complete all required fields.")
+                        st.stop()
+
+                    conn = db.get_db_connection()
+                    if not conn:
+                        st.error("❌ Unable to connect to the database.")
+                        st.stop()
+                    try:
+                        ok = db.create_student(
+                            name=name, email=email, password=password,
+                            level_label=level, country_label=country
+                        )
+                        if ok:
+                            st.success("✅ Signup successful! Please go to the **Login** page to continue.")
+                            st.session_state.current_page = "Login"
+                            st.session_state.signup_role = None
+                            st.rerun()
+                        else:
+                            st.error("❌ Failed to create user. Email may already exist.")
+                    finally:
+                        conn.close()
+
+        # Step 2b: Teacher form
+        elif role == "Teacher":
+            st.subheader("Teacher Signup")
+            with st.form("teacher_signup_form", clear_on_submit=False):
+                title = st.selectbox("Title", ["Mr", "Ms", "Miss", "Mrs", "Dr", "Prof", "Other"])
+                name = st.text_input("Full Name")
+                email = st.text_input("Email")
+                password = st.text_input("Password", type="password")
+                submitted = st.form_submit_button("Create Teacher Account")
+
+                if submitted:
+                    if not (title.strip() and name.strip() and email.strip() and password.strip()):
+                        st.error("⚠️ Please complete all required fields.")
+                        st.stop()
+
+                    conn = db.get_db_connection()
+                    if not conn:
+                        st.error("❌ Unable to connect to the database.")
+                        st.stop()
+                    try:
+                        ok = db.create_teacher(
+                            title=title, name=name, email=email, password=password
+                        )
+                        if ok:
+                            st.success("✅ Signup successful! Please go to the **Login** page to continue.")
+                            st.session_state.current_page = "Login"
+                            st.session_state.signup_role = None
+                            st.rerun()
+                        else:
+                            st.error("❌ Failed to create user. Email may already exist.")
+                    finally:
+                        conn.close()
+
+        # Allow changing role without going back manually
+        if st.button("⬅️ Choose a different role"):
+            st.session_state.signup_role = None
+            st.rerun()
+
+    # --- LOGIN PAGE ---
+    elif page == "Login":
+        st.title("🔑 Login")
+        if st.session_state.user:
+            st.success(f"Welcome, {st.session_state.user['name']}! ✅")
+        else:
+            with st.form("login_form"):
+                email = st.text_input("Email")
+                password = st.text_input("Password", type="password")
+                submit = st.form_submit_button("Login")
+
+                if submit:
+                    conn = db.get_db_connection()
+                    if not conn:
+                        st.error("❌ Unable to connect to the database.")
+                    else:
+                        try:
+                            user = db.check_password(email, password)
+                            if user:
+                                st.session_state.user = {
+                                    "user_id": user["user_id"],
+                                    "name": user["name"],
+                                    "role": user["role"],  # "Student" or "Teacher"
+                                    "email": user["email"],
+                                }
+                                st.success(f"🎉 Logged in as {user['name']} ({user['role']})")
+                                st.session_state.current_page = (
+                                    "Student Dashboard" if user["role"] == "Student" else "Teacher Dashboard"
+                                )
+                                st.rerun()
+                            else:
+                                st.error("❌ Incorrect email or password, or account not found.")
+                        finally:
+                            conn.close()
+
+    # --- STUDENT DASHBOARD ---
+    elif page == "Student Dashboard":
+        if not st.session_state.user:
+            st.error("❌ Please login first.")
+            st.session_state.current_page = "Login"
+            st.rerun()
+        elif st.session_state.user["role"] != "Student":
+            st.error("🚫 Only students can access this page.")
+            st.session_state.current_page = "Welcome"
+            st.rerun()
+        else:
+            student_db.show_student_dashboard()
+
+    # --- TEACHER DASHBOARD ---
+    elif page == "Teacher Dashboard":
+        if not st.session_state.user:
+            st.error("❌ Please login first.")
+            st.session_state.current_page = "Login"
+            st.rerun()
+        elif st.session_state.user["role"] != "Teacher":
+            st.error("🚫 Only teachers can access this page.")
+            st.session_state.current_page = "Welcome"
+            st.rerun()
+        else:
+            teacher_db.show_teacher_dashboard()
+
+
+    # --- PRIVATE PAGES ---
+    private_pages_map = {
+        "Lessons": lesson.show_page,
+        "Quiz": quiz.show_page,
+        "Chatbot": chatbot.show_page,
+        "Game": game.show_games,
+        "Teacher Link": teacherlink.show_code,
+        "Class management": classmanage.show_page,
+        "Students List": studentlist.show_page,
+        "Content Management": contentmanage.show_page
+    }
+
+    if page in private_pages_map:
+        if not st.session_state.user:
+            st.error("❌ Please login first.")
+            st.session_state.current_page = "Login"
+            st.rerun()
+        elif page in ["Lessons", "Quiz", "Chatbot", "Game", "Teacher Link"] and st.session_state.user["role"] == "Student":
+            private_pages_map[page]()
+        elif page in ["Class management", "Students List", "Content Management"] and st.session_state.user["role"] == "Teacher":
+            private_pages_map[page]()
+        else:
+            st.error("🚫 You don’t have access to this page.")
+            st.session_state.current_page = "Welcome"
+            st.rerun()
+
+
+
+if __name__ == "__main__":
+    main()
+
 ================================================================================
 
 
