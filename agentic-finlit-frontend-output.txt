@@ -5,7 +5,7 @@ PROJECT EXPORT FOR LLMs
 PROJECT INFORMATION:
 --------------------------------------------------
 Project Name: agentic-finlit-frontend
-Generated On: 2025-09-08 05:17:06 (Etc/GMT+5 / GMT-05:00)
+Generated On: 2025-09-08 06:00:35 (Etc/GMT+5 / GMT-05:00)
 Total Files Processed: 63
 Export Tool: Easy Whole Project to Single Text File for LLMs v1.1.0
 Tool Author: Jota / José Guilherme Pandolfi
@@ -93,9 +93,9 @@ PROJECT STRUCTURE
 │       └── 📄 studentlist.py (6.06 KB)
 ├── 📁 utils/
 │   ├── 📄 api.py (1.24 KB)
-│   ├── 📄 auth.py
+│   ├── 📄 auth.py (386 B)
 │   ├── 📄 db.py
-│   └── 📄 state.py
+│   └── 📄 state.py (305 B)
 ├── 📄 Dockerfile (445 B)
 ├── 📄 README.md (465 B)
 ├── 📄 requirements.txt (82 B)
@@ -6625,20 +6625,29 @@ FILE: utils/auth.py
 
 FILE INFORMATION:
 ----------------------------------------
-Size: 0 B
+Size: 386 B
 Extension: .py
 Language: python
 Location: utils/auth.py
 Relative Path: utils
 Created: 2025-09-08 04:30:14 (Etc/GMT+5 / GMT-05:00)
-Modified: 2025-09-08 04:30:14 (Etc/GMT+5 / GMT-05:00)
-MD5: d41d8cd98f00b204e9800998ecf8427e
-SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+Modified: 2025-09-08 05:58:00 (Etc/GMT+5 / GMT-05:00)
+MD5: 7faf2a36158acc3b4bd7d30e7f16f6e2
+SHA256: bc6e9409ffd2aed9e98e111650436cda0632aff2b04213cab1428b0a25f096dc
 Encoding: ASCII
 
 FILE CONTENT:
 ----------------------------------------
+from .db import check_password, create_student, create_teacher
 
+def authenticate(email, password):
+    return check_password(email, password)
+
+def register_student(name, email, password, level, country):
+    return create_student(name, email, password, level, country)
+
+def register_teacher(title, name, email, password):
+    return create_teacher(title, name, email, password)
 ================================================================================
 
 
@@ -6671,20 +6680,32 @@ FILE: utils/state.py
 
 FILE INFORMATION:
 ----------------------------------------
-Size: 0 B
+Size: 305 B
 Extension: .py
 Language: python
 Location: utils/state.py
 Relative Path: utils
 Created: 2025-09-08 04:30:19 (Etc/GMT+5 / GMT-05:00)
-Modified: 2025-09-08 04:30:58 (Etc/GMT+5 / GMT-05:00)
-MD5: d41d8cd98f00b204e9800998ecf8427e
-SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+Modified: 2025-09-08 05:58:07 (Etc/GMT+5 / GMT-05:00)
+MD5: 480ad6bbec054aaf566d4b1cd21dfe6e
+SHA256: 47042c42c8b00d16f4074b8b3f819c766844bc9c41c5b7598b3ff1e82614e224
 Encoding: ASCII
 
 FILE CONTENT:
 ----------------------------------------
+import streamlit as st
 
+def get_user():
+    return st.session_state.get('user', None)
+
+def set_user(user):
+    st.session_state.user = user
+
+def get_current_page():
+    return st.session_state.get('current_page', 'Welcome')
+
+def set_current_page(page):
+    st.session_state.current_page = page
 ================================================================================
 
 
@@ -6770,7 +6791,7 @@ Language: python
 Location: streamlit_app.py
 Relative Path: root
 Created: 2025-09-08 03:34:26 (Etc/GMT+5 / GMT-05:00)
-Modified: 2025-09-08 05:17:05 (Etc/GMT+5 / GMT-05:00)
+Modified: 2025-09-08 06:00:35 (Etc/GMT+5 / GMT-05:00)
 MD5: 74b0032389fba5928c0f733d1a7c00bb
 SHA256: 6af296120bafa4bd0ca953225ad6ce1071617defb2809060ae05f5b738459a01
 Encoding: UTF-8
