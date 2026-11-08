@@ -1,15 +1,17 @@
-# Python
+node_modules/
+dist/
+.vite/
+
+# Python leftovers
 __pycache__/
 *.pyc
+.venv/
 
 # Envs & secrets
-.venv/
 .env
 .env.*
 !.env.example
 
-# Streamlit
-.streamlit/
-
-# VS Code
 .vscode/
+.DS_Store
+*.tsbuildinfo

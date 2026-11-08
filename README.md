@@ -1,34 +1,42 @@
----
-title: Agentic Finlit Frontend
-emoji: 🚀
-colorFrom: red
-colorTo: red
-sdk: streamlit
-app_port: 8501
-app_file: streamlit_app.py
-pinned: false
-short_description: agentic-finlit-frontend
-license: unknown
----
+# SmartKids — Frontend (React)
 
-# SmartKids FinEdu — Frontend (Streamlit)
+React + Vite + Tailwind web app for students and teachers. It talks to **SmartKids-backend** at `/api`
+(FastAPI + Supabase + FinBuddy, the RAG tutor).
 
-Student + teacher app. All data lives in **Supabase**; the AI tutor (RAG chat, lesson summaries,
-mini-quizzes, auto-generated teacher quizzes) is served by **SmartKids-backend**.
+**Students:** pick a level → read a lesson → take the quiz → FinBuddy marks it and you can chat about every
+answer → next lesson. Pass every lesson in a level to unlock its game (Money Match, Budget Builder,
+Profit Puzzle, Debt Dilemma); win it to unlock the next level. Students earn XP and streaks, and can join a class.
 
-## Setup
+**Teachers:** create classes (students join with a 6-letter code), upload a PDF / Word / text document or
+type a topic and FinBuddy writes a lesson and quiz, edit any quiz, assign work with due dates, and track every
+student's scores, quiz chats and the class leaderboard.
 
-1. Set up Supabase and the backend first — see `SmartKids-backend/README.md`.
-2. Then:
+## Run it (development)
+
+Set up Supabase and the backend first (see `../SmartKids-backend/README.md`), then start the backend on port 7860:
 
 ```bash
 cd SmartKids-frontend
-python -m venv .venv && .venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env          # DATABASE_URL (same as backend) + BACKEND_URL
-streamlit run streamlit_app.py
+npm install
+npm run dev
 ```
 
-The sidebar's **🔌 AI tutor status** panel shows whether the backend, database and LLM are reachable.
+Open <http://localhost:5173>. Vite forwards `/api` to `http://localhost:7860`.
 
-On Hugging Face add `DATABASE_URL` and `BACKEND_URL` (and `BACKEND_API_KEY` if used) as Space secrets.
+## Run it (school demo, one server)
+
+```bash
+npm run build
+```
+
+Now `uvicorn app.main:app --port 7860` in the backend also serves this app at <http://localhost:7860>.
+
+## Layout
+
+| Path | What |
+|---|---|
+| `src/pages/student` | Home, learning path, lesson, quiz, review + chat, games, tutor, my class |
+| `src/pages/teacher` | Dashboard, class progress, student report, library (upload / generate), quiz + lesson editors |
+| `src/games` | The four level games |
+| `src/components` | Layout (sidebar), FinBuddy mascot, chat, shared UI |
+| `public/money` | Jamaican coin and note images used by Money Match |

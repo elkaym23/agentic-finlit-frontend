@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    @apply font-sans text-ink min-h-screen;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #d8f3e2 0%, transparent 60%),
+      radial-gradient(900px 600px at 110% 10%, #fff1b8 0%, transparent 55%),
+      linear-gradient(160deg, #e9ecfb 0%, #ede6fb 55%, #e5ecfa 100%);
+    background-attachment: fixed;
+  }
+  ::selection { background: #fed10066; }
+}
+
+@layer components {
+  .card { @apply bg-white rounded-4xl shadow-card border border-white/60; }
+  .card-pad { @apply p-5 sm:p-6; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-semibold transition
+         active:scale-[.97] disabled:opacity-50 disabled:pointer-events-none; }
+  .btn-dark { @apply btn bg-ink text-white hover:bg-black; }
+  .btn-green { @apply btn bg-jam-green text-white hover:bg-[#008532]; }
+  .btn-gold { @apply btn bg-jam-gold text-ink hover:bg-jam-sun; }
+  .btn-ghost { @apply btn bg-white text-ink border border-black/10 hover:bg-black/5; }
+  .btn-sm { @apply px-3.5 py-1.5 text-sm; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold; }
+  .input { @apply w-full rounded-2xl border border-black/10 bg-white px-4 py-3 outline-none transition
+           focus:border-jam-green focus:ring-4 focus:ring-jam-green/15; }
+  .label { @apply mb-1.5 block text-sm font-semibold text-ink-soft; }
+  .h-page { @apply text-3xl sm:text-4xl font-bold tracking-tight; }
+  .muted { @apply text-ink-mute; }
+}
+
+/* Lesson + chat markdown */
+.prose-kid { @apply text-[17px] leading-relaxed text-ink-soft; }
+.prose-kid p { @apply my-3; }
+.prose-kid strong { @apply text-ink font-semibold; }
+.prose-kid ul { @apply my-3 list-disc pl-6 space-y-1; }
+.prose-kid ol { @apply my-3 list-decimal pl-6 space-y-1; }
+.prose-kid table { @apply my-4 w-full overflow-hidden rounded-2xl text-left text-base; }
+.prose-kid th { @apply bg-tile-mint px-4 py-2 font-semibold text-ink; }
+.prose-kid td { @apply border-t border-black/5 bg-white px-4 py-2; }
+.prose-kid em { @apply text-ink; }
+.prose-chat p { @apply my-1.5; }
+.prose-chat ul, .prose-chat ol { @apply my-1.5 pl-5 space-y-0.5; }
+.prose-chat ul { @apply list-disc; }
+.prose-chat ol { @apply list-decimal; }
+.prose-chat strong { @apply font-semibold; }
+
+.scroll-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+.scroll-thin::-webkit-scrollbar-thumb { background: #0001; border-radius: 99px; }
