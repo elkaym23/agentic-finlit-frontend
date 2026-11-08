@@ -1,5 +1,8 @@
-import streamlit as st
 import datetime
+import html
+import re
+
+import streamlit as st
 from utils import api as backend  # our HTTP client to the backend
 
 # --- Helper to add message ---
@@ -15,7 +18,7 @@ def add_message(text: str, sender: str):
 
 def show_page():
     st.title("🤖 AI Financial Tutor")
-    st.caption("Powered by your backend using Mistral on Hugging Face")
+    st.caption("FinBuddy answers from your SmartKids lessons (RAG) — ask about money, saving and budgeting!")
 
     # --- Initialize state ---
     if "messages" not in st.session_state:
@@ -34,12 +37,15 @@ def show_page():
     chat_container = st.container()
     with chat_container:
         for msg in st.session_state.messages:
+            # escape model/user text before putting it inside raw HTML; keep line breaks
+            text = html.escape(msg["text"]).replace("\n", "<br>")
+            text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)  # keep **bold** from the tutor
             bubble = (
                 f"<div style='background-color:#e0e0e0;color:black;padding:10px;border-radius:12px;max-width:70%;margin-bottom:5px;'>"
-                f"{msg['text']}<br><sub>{msg['timestamp'].strftime('%H:%M')}</sub></div>"
+                f"{text}<br><sub>{msg['timestamp'].strftime('%H:%M')}</sub></div>"
                 if msg["sender"] == "assistant"
                 else f"<div style='background-color:#4CAF50;color:white;padding:10px;border-radius:12px;max-width:70%;margin-left:auto;margin-bottom:5px;'>"
-                     f"{msg['text']}<br><sub>{msg['timestamp'].strftime('%H:%M')}</sub></div>"
+                     f"{text}<br><sub>{msg['timestamp'].strftime('%H:%M')}</sub></div>"
             )
             st.markdown(bubble, unsafe_allow_html=True)
         if st.session_state.is_typing:
@@ -82,6 +88,8 @@ def show_page():
                     "level_slug": level_slug,
                     # If your backend accepts history, send it too:
                     "history": [{"role": m["sender"], "content": m["text"]} for m in st.session_state.messages[-10:]],
+                    # set when arriving from a lesson's mini-quiz, so answers focus on that lesson
+                    "lesson_id": st.session_state.get("chat_lesson_id"),
                 }
 
                 # utils/api.py -> chat() should POST to /chat and return {"reply": "..."}

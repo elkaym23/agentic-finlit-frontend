@@ -1,35 +1,37 @@
-import altair as alt
-import numpy as np
-import pandas as pd
 import streamlit as st
-import os
-import requests
-
-st.set_page_config(page_title="Agentic FinLit Frontend", page_icon="💹", layout="centered")
-
-BACKEND_URL = os.getenv("BACKEND_URL", "").rstrip("/")
-st.title("Agentic FinLit Frontend (Starter)")
-
-if BACKEND_URL:
-    try:
-        r = requests.get(f"{BACKEND_URL}/")
-        st.success(f"Backend OK: {r.json()}")
-    except Exception as e:
-        st.error(f"Could not reach backend: {e}")
-else:
-    st.info("Set BACKEND_URL in Space secrets to ping the backend here.")
-
-
-from dashboards import student_db,teacher_db
-from phase.Student_view import chatbot, lesson, quiz, game, teacherlink
-from phase.Teacher_view import classmanage,studentlist,contentmanage
-from phase.Student_view.games import profitpuzzle
-from utils import db
-import os
 from dotenv import load_dotenv
 
-
 load_dotenv()
+
+st.set_page_config(page_title="SmartKids FinEdu", page_icon="💹", layout="centered")
+
+from dashboards import student_db, teacher_db
+from phase.Student_view import chatbot, lesson, quiz, game, teacherlink, miniquiz
+from phase.Teacher_view import classmanage, studentlist, contentmanage
+from phase.Student_view.games import profitpuzzle
+from utils import db
+from utils import api as backend_api
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def _backend_status():
+    try:
+        h = backend_api.health()
+        return ("ok" if h.get("ok") else "warn"), h
+    except Exception as e:
+        return "down", {"error": str(e)}
+
+
+def _show_backend_status():
+    state, info = _backend_status()
+    with st.sidebar.expander("🔌 AI tutor status", expanded=(state != "ok")):
+        if state == "ok":
+            st.success(f"Online · {info['llm']['provider']} / {info['llm']['model']} · {info.get('chunks', 0)} notes indexed")
+        elif state == "warn":
+            st.warning(f"Backend up but not healthy: {info.get('db')}")
+        else:
+            st.error(f"Backend unreachable at {backend_api.BACKEND}")
+            st.caption(info.get("error", ""))
 
 
 # --- SESSION STATE INITIALIZATION ---
@@ -111,6 +113,7 @@ def setup_navigation():
 # --- ROUTING ---
 def main():
     setup_navigation()
+    _show_backend_status()
     page = st.session_state.current_page
 
     # --- WELCOME PAGE ---
@@ -250,6 +253,8 @@ def main():
                                     "name": user["name"],
                                     "role": user["role"],  # "Student" or "Teacher"
                                     "email": user["email"],
+                                    "level": user.get("level", "beginner"),
+                                    "level_slug": user.get("level", "beginner"),
                                 }
                                 st.success(f"🎉 Logged in as {user['name']} ({user['role']})")
                                 st.session_state.current_page = (
@@ -293,6 +298,7 @@ def main():
         "Lessons": lesson.show_page,
         "Quiz": quiz.show_page,
         "Chatbot": chatbot.show_page,
+        "Mini Quiz": miniquiz.show_page,
         "Game": game.show_games,
         "Teacher Link": teacherlink.show_code,
         "Class management": classmanage.show_page,
@@ -305,7 +311,7 @@ def main():
             st.error("❌ Please login first.")
             st.session_state.current_page = "Login"
             st.rerun()
-        elif page in ["Lessons", "Quiz", "Chatbot", "Game", "Teacher Link"] and st.session_state.user["role"] == "Student":
+        elif page in ["Lessons", "Quiz", "Chatbot", "Mini Quiz", "Game", "Teacher Link"] and st.session_state.user["role"] == "Student":
             private_pages_map[page]()
         elif page in ["Class management", "Students List", "Content Management"] and st.session_state.user["role"] == "Teacher":
             private_pages_map[page]()

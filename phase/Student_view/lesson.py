@@ -206,10 +206,21 @@ def _ensure_progress_state():
     if "lesson_completed" not in st.session_state:
         st.session_state.lesson_completed = {}  # {lesson_id: True/False}
 
+def _level_slug_from_user(user: dict | None) -> str:
+    user = user or {}
+    return (user.get("level_slug") or user.get("level") or "beginner").lower()
+
 def _mark_topic_seen(lesson_id: int, topic_index: int):
     _ensure_progress_state()
     current = st.session_state.topic_progress.get(lesson_id, 0)
     st.session_state.topic_progress[lesson_id] = max(current, topic_index)
+    # persist only when the student reaches a new topic (not on every rerun)
+    if topic_index > current and st.session_state.get("user"):
+        try:
+            dbapi.update_lesson_position(st.session_state.user["user_id"], lesson_id, topic_index,
+                                         st.session_state.get("selected_assignment"))
+        except Exception as e:
+            print(f"[lesson] could not save progress: {e}")
 
 def _is_lesson_completed(lesson_id: int) -> bool:
     _ensure_progress_state()
@@ -220,6 +231,37 @@ def _complete_lesson(lesson):
     st.session_state.lesson_completed[lesson["id"]] = True
     # reflect in the in-memory lessons list too (so the cards show ✓)
     lesson["completed"] = True
+    if st.session_state.get("user"):
+        try:
+            dbapi.complete_lesson(st.session_state.user["user_id"], lesson["id"],
+                                  st.session_state.get("selected_assignment"))
+        except Exception as e:
+            st.warning(f"Could not save lesson completion: {e}")
+
+def _finish_lesson_with_agent(lesson):
+    """Mark complete, then ask the RAG agent for a summary + mini-quiz and open the Mini Quiz page."""
+    _complete_lesson(lesson)
+    s = st.session_state.user
+    level_slug = _level_slug_from_user(s)
+    st.session_state.mini_quiz_ctx = {
+        "lesson_id": lesson["id"], "lesson_title": lesson["title"], "level_slug": level_slug,
+        "assignment_id": st.session_state.get("selected_assignment"),
+    }
+    try:
+        with st.spinner("FinBuddy is reviewing the lesson and making your mini-quiz..."):
+            resp = backend.start_agent(s["user_id"], lesson["id"], level_slug, lesson_title=lesson["title"])
+            st.session_state.lesson_summary = resp.get("summary", "")
+            st.session_state.generated_quiz = backend.get_quiz(
+                s["user_id"], lesson["id"], level_slug, lesson_title=lesson["title"]
+            )
+    except Exception as e:
+        st.success("🎉 Module completed! Great job.")
+        st.error(f"The AI tutor couldn't build a mini-quiz right now: {e}")
+        return
+    st.session_state.mini_quiz_answers = {}
+    st.session_state.mini_quiz_result = None
+    st.session_state.current_page = "Mini Quiz"
+    st.rerun()  # outside try: st.rerun() works by raising an exception
 
 
 #-----
@@ -463,33 +505,7 @@ def show_lesson_page(lesson, lessons):
                 # Last topic - finish and jump into agent + mini-quiz
                 if not _is_lesson_completed(lesson["id"]):
                     if st.button("✅ Complete Module", key=f"complete_{lesson['id']}", type="primary"):
-                        _complete_lesson(lesson)
-                        s = st.session_state.user
-                        level_slug = _level_slug_from_user(s)
-
-                        try:
-                            # 1) call agent to summarize and set up quiz
-                            resp = backend.start_agent(
-                                student_id=s["user_id"],
-                                lesson_id=lesson["id"],
-                                level_slug=level_slug,
-                            )
-
-                            st.success("🎉 Module completed! Great job.")
-                            st.info("Quick summary:")
-                            st.write(resp.get("summary", "(no summary returned)"))
-
-                            # 2) fetch auto-generated mini-quiz and route to the quiz page
-                            st.session_state.generated_quiz = backend.get_quiz(
-                                s["user_id"],
-                                lesson["id"],
-                                level_slug,
-                            )
-                            st.session_state.current_page = "Mini Quiz"
-                            st.rerun()
-
-                        except Exception as e:
-                            st.error(f"Could not start agent or fetch quiz: {e}")
+                        _finish_lesson_with_agent(lesson)
                 else:
                     st.button("✅ Completed", key=f"completed_{lesson['id']}", disabled=True)
             st.markdown("</div>", unsafe_allow_html=True)
@@ -658,31 +674,7 @@ def show_db_lesson_page(lesson):
             else:
                 if not _is_lesson_completed(lesson["id"]):
                     if st.button("✅ Complete Module", key=f"db_complete_{lesson['id']}", type="primary"):
-                        _complete_lesson(lesson)
-                        s = st.session_state.user
-                        level_slug = _level_slug_from_user(s)
-
-                        try:
-                            resp = backend.start_agent(
-                                student_id=s["user_id"],
-                                lesson_id=lesson["id"],
-                                level_slug=level_slug,
-                            )
-
-                            st.success("🎉 Module completed! Great job.")
-                            st.info("Quick summary:")
-                            st.write(resp.get("summary", "(no summary returned)"))
-
-                            st.session_state.generated_quiz = backend.get_quiz(
-                                s["user_id"],
-                                lesson["id"],
-                                level_slug,
-                            )
-                            st.session_state.current_page = "Mini Quiz"
-                            st.rerun()
-
-                        except Exception as e:
-                            st.error(f"Could not start agent or fetch quiz: {e}")
+                        _finish_lesson_with_agent(lesson)
                 else:
                     st.button("✅ Completed", key=f"db_completed_{lesson['id']}", disabled=True)
             st.markdown("</div>", unsafe_allow_html=True)
