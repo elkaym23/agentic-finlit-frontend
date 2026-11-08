@@ -12,7 +12,7 @@ export default function LearnPath() {
     <div className="space-y-8">
       <div>
         <h1 className="h-page">Your learning path</h1>
-        <p className="muted mt-1">Read a lesson → take the quiz → chat with FinBuddy → next lesson. Finish a level to unlock its game!</p>
+        <p className="muted mt-1">Read a lesson → take the quiz → chat with Casheous → next lesson. Finish a level to unlock its game!</p>
       </div>
 
       {data.levels.map((lv) => {

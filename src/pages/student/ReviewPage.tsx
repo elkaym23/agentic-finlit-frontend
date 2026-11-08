@@ -53,7 +53,7 @@ export default function ReviewPage() {
               {S.xp > 0 && <span className="chip bg-jam-gold">+{S.xp} XP</span>}
               <span className="chip bg-white/70">{timeAgo(S.submitted_at)}</span>
             </div>
-            {!S.passed && isStudent && <p className="mt-3 text-sm">Chat with FinBuddy about what tripped you up, then have another go.</p>}
+            {!S.passed && isStudent && <p className="mt-3 text-sm">Chat with Casheous about what tripped you up, then have another go.</p>}
           </div>
           {next && isStudent && (
             <Link to={next.to} className={`${S.passed ? "btn-green" : "btn-dark"} shrink-0 px-5 py-3`}>
@@ -99,9 +99,9 @@ export default function ReviewPage() {
       <aside className="xl:sticky xl:top-5 xl:self-start">
         <div className="rounded-4xl bg-ink p-5 text-white">
           <div className="mb-4 flex items-center gap-3">
-            <Mascot size={52} mood={S.passed ? "cheer" : "think"} />
+            <div className="shrink-0 rounded-full bg-white p-1"><Mascot size={48} mood={S.passed ? "happy" : "think"} face /></div>
             <div>
-              <div className="font-bold">Talk it through with FinBuddy</div>
+              <div className="font-bold">Talk it through with Casheous</div>
               <div className="text-sm text-white/70">{isStudent ? "Ask about any question on this quiz" : "The student's chat about this quiz"}</div>
             </div>
           </div>
@@ -125,7 +125,7 @@ function ReadOnlyChat({ msgs }: { msgs: Submission["chat"] }) {
     <div className="max-h-[520px] space-y-3 overflow-y-auto p-2 scroll-thin">
       {msgs.map((m, i) => (
         <div key={i} className={`rounded-2xl px-3 py-2 text-sm ${m.role === "user" ? "ml-8 bg-jam-green text-white" : "mr-8 bg-[#f7f6fb]"}`}>
-          <div className="mb-0.5 text-[11px] font-bold uppercase opacity-60">{m.role === "user" ? "Student" : "FinBuddy"}</div>
+          <div className="mb-0.5 text-[11px] font-bold uppercase opacity-60">{m.role === "user" ? "Student" : "Casheous"}</div>
           {m.role === "assistant" ? <Markdown className="prose-chat">{m.content}</Markdown> : <div className="whitespace-pre-wrap">{m.content}</div>}
         </div>
       ))}

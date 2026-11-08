@@ -47,7 +47,7 @@ export default function Welcome() {
         </h1>
         <p className="mt-5 max-w-lg text-lg text-ink-soft">
           Learn about JA$ coins and notes, saving, budgeting and running a business, with fun quizzes, games and
-          <b> FinBuddy</b>, your AI doctor-bird tutor.
+          <b> Casheous</b>, your AI doctor-bird tutor.
         </p>
         <div className="mt-8 grid max-w-lg grid-cols-3 gap-3">
           {LEVELS.map((l, i) => (

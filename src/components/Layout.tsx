@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth";
+import Mascot from "./Mascot";
 
 const I = {
   home: <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />,
@@ -23,7 +24,7 @@ export default function Layout() {
   if (!user) return null;
   const items = user.role === "Student"
     ? [{ to: "/", icon: I.home, label: "Home" }, { to: "/learn", icon: I.map, label: "Learn" },
-       { to: "/games", icon: I.game, label: "Games" }, { to: "/tutor", icon: I.chat, label: "Ask FinBuddy" },
+       { to: "/games", icon: I.game, label: "Games" }, { to: "/tutor", icon: I.chat, label: "Ask Casheous" },
        { to: "/class", icon: I.class, label: "My Class" }]
     : [{ to: "/", icon: I.home, label: "Dashboard" }, { to: "/library", icon: I.book, label: "Lessons & Quizzes" }];
 
@@ -35,7 +36,7 @@ export default function Layout() {
     <div className="mx-auto flex min-h-screen max-w-[1440px] gap-5 p-3 sm:p-5">
       {/* desktop pill sidebar */}
       <aside className="sticky top-5 hidden h-[calc(100vh-2.5rem)] w-[72px] shrink-0 flex-col items-center md:flex">
-        <Link to="/" className="mb-5 grid h-14 w-14 place-items-center rounded-full bg-white text-3xl shadow-card" title="SmartKids">🐦</Link>
+        <Link to="/" className="mb-5 grid h-14 w-14 place-items-center rounded-full bg-white text-3xl shadow-card" title="SmartKids"><Mascot size={44} face /></Link>
         <nav className="flex flex-col items-center gap-2 rounded-full bg-ink px-2.5 py-4 shadow-float">
           {items.map((it) => (
             <NavLink key={it.to} to={it.to} end={it.to === "/"} className={link} aria-label={it.label}>
@@ -55,7 +56,7 @@ export default function Layout() {
         <div className="card min-h-[calc(100vh-2.5rem)] px-4 py-5 sm:px-8 sm:py-7">
           <header className="mb-6 flex items-center justify-between gap-3">
             <Link to="/" className="flex items-center gap-3">
-              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-jam-green text-xl text-white md:hidden">🐦</div>
+              <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white shadow-card md:hidden"><Mascot size={36} face /></div>
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wider text-jam-green">SmartKids</div>
                 <div className="hidden text-sm text-ink-mute sm:block">{new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</div>

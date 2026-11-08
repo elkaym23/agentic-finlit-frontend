@@ -124,7 +124,7 @@ export default function ClassPage() {
             </table>
           </div>
           {cols.length === 0 && <div className="text-sm text-ink-mute">Nothing assigned yet. Go to Lessons & Quizzes to assign work.</div>}
-          <div className="text-xs text-ink-mute">✓ passed · ↻ tried, not passed yet · tap a score to see their answers and FinBuddy chat</div>
+          <div className="text-xs text-ink-mute">✓ passed · ↻ tried, not passed yet · tap a score to see their answers and Casheous chat</div>
         </div>
       ))}
 

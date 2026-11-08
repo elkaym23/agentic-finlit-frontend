@@ -8,7 +8,7 @@ import type { ChatMsg } from "../../types";
 export default function Tutor() {
   const { user } = useAuth();
   const history = useRef<ChatMsg[]>([]);
-  const welcome: ChatMsg[] = [{ role: "assistant", content: `Hi ${user?.name ?? "there"}! 🐦 I'm **FinBuddy**. Ask me anything about money: saving, budgeting, banks, or running a business. Wha yuh waan know?` }];
+  const welcome: ChatMsg[] = [{ role: "assistant", content: `Hi ${user?.name ?? "there"}! 🐦 I'm **Casheous**. Ask me anything about money: saving, budgeting, banks, or running a business. Wha yuh waan know?` }];
 
   const send = async (message: string) => {
     const r = await api.post<{ reply: string }>("/api/chat", { message, history: history.current.slice(-10) });
@@ -21,7 +21,7 @@ export default function Tutor() {
       <div className="mb-5 flex items-center gap-4">
         <div className="animate-bob"><Mascot size={76} mood="happy" /></div>
         <div>
-          <h1 className="h-page">Ask FinBuddy</h1>
+          <h1 className="h-page">Ask Casheous</h1>
           <p className="muted">Your doctor-bird money tutor. It uses your lessons to answer.</p>
         </div>
       </div>

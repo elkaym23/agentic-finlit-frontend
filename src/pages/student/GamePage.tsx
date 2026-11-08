@@ -77,7 +77,7 @@ export default function GamePage() {
           <div className="mt-2 flex flex-wrap justify-center gap-3">
             <button className="btn-ghost" onClick={again}>Play again</button>
             {res.won && next && next.to !== `/games/${slug}` && <Link className="btn-green" to={next.to}>{next.label} →</Link>}
-            {!res.won && <Link className="btn-dark" to="/tutor">Ask FinBuddy for tips</Link>}
+            {!res.won && <Link className="btn-dark" to="/tutor">Ask Casheous for tips</Link>}
           </div>
         </div>
       ) : (

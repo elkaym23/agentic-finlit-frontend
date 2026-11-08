@@ -4,7 +4,7 @@ import Mascot from "./Mascot";
 import { Markdown } from "./ui";
 
 /** Chat UI shared by the quiz review and the free tutor. `send` returns the assistant reply. */
-export default function ChatThread({ messages, send, suggestions = [], placeholder = "Ask FinBuddy anything…", height = "h-[460px]" }:
+export default function ChatThread({ messages, send, suggestions = [], placeholder = "Ask Casheous anything…", height = "h-[460px]" }:
   { messages: ChatMsg[]; send: (text: string) => Promise<string>; suggestions?: string[]; placeholder?: string; height?: string }) {
   const [msgs, setMsgs] = useState<ChatMsg[]>(messages);
   const [text, setText] = useState("");
@@ -37,7 +37,7 @@ export default function ChatThread({ messages, send, suggestions = [], placehold
       <div className={`${height} space-y-4 overflow-y-auto rounded-3xl bg-[#f7f6fb] p-4 scroll-thin`}>
         {msgs.map((m, i) => (
           <div key={i} className={`flex items-end gap-2 ${m.role === "user" ? "justify-end" : ""}`}>
-            {m.role === "assistant" && <div className="mb-1 shrink-0 rounded-full bg-white p-0.5 shadow-sm"><Mascot size={34} /></div>}
+            {m.role === "assistant" && <div className="mb-1 shrink-0 rounded-full bg-white p-0.5 shadow-sm"><Mascot size={34} face /></div>}
             <div className={`max-w-[82%] animate-pop rounded-3xl px-4 py-2.5 text-[15px] leading-relaxed ${
               m.role === "user" ? "rounded-br-lg bg-jam-green text-white" : "rounded-bl-lg bg-white text-ink shadow-sm"}`}>
               {m.role === "assistant" ? <Markdown className="prose-chat">{m.content}</Markdown> : m.content}
@@ -46,7 +46,7 @@ export default function ChatThread({ messages, send, suggestions = [], placehold
         ))}
         {busy && (
           <div className="flex items-end gap-2">
-            <div className="rounded-full bg-white p-0.5 shadow-sm"><Mascot size={34} mood="think" /></div>
+            <div className="rounded-full bg-white p-0.5 shadow-sm"><Mascot size={34} mood="think" face /></div>
             <div className="flex gap-1 rounded-3xl rounded-bl-lg bg-white px-4 py-3 shadow-sm">
               {[0, 1, 2].map((d) => <span key={d} className="h-2 w-2 animate-bounce rounded-full bg-jam-green/60" style={{ animationDelay: `${d * 120}ms` }} />)}
             </div>

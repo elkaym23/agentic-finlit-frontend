@@ -125,12 +125,12 @@ export default function StudentHome() {
           <div className="relative flex items-center gap-3">
             <div className="animate-bob"><Mascot size={84} mood="happy" /></div>
             <div>
-              <div className="text-lg font-bold">FinBuddy</div>
+              <div className="text-lg font-bold">Casheous</div>
               <div className="text-sm text-white/70">Your doctor-bird tutor</div>
             </div>
           </div>
           <div className="relative mt-4 rounded-3xl bg-white/10 p-4 text-sm leading-relaxed">💡 {tip}</div>
-          <Link to="/tutor" className="btn-gold relative mt-4 w-full">Ask FinBuddy a question</Link>
+          <Link to="/tutor" className="btn-gold relative mt-4 w-full">Ask Casheous a question</Link>
         </div>
 
         <div className="grid grid-cols-2 gap-3">

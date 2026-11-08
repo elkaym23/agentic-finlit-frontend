@@ -45,7 +45,7 @@ export default function Library() {
         <div className="flex flex-wrap items-center gap-4">
           <Mascot size={64} mood="think" />
           <div className="min-w-0 flex-1">
-            <div className="text-xl font-bold">Create with FinBuddy</div>
+            <div className="text-xl font-bold">Create with Casheous</div>
             <div className="text-sm text-white/70">Any subject works, not just money.</div>
           </div>
           <div className="flex rounded-full bg-white/10 p-1">
@@ -180,11 +180,11 @@ function UploadForm({ onDone }: { onDone: (r: { quiz_id: number }) => void }) {
         <div className="text-sm text-ink-mute">{file ? `${(file.size / 1024).toFixed(0)} KB · click to change` : "or click to choose · max 10 MB"}</div>
         <input ref={input} type="file" hidden accept=".pdf,.docx,.txt,.md" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
       </div>
-      <div><label className="label">Lesson title <span className="font-normal text-ink-mute">(optional, FinBuddy can name it)</span></label>
+      <div><label className="label">Lesson title <span className="font-normal text-ink-mute">(optional, Casheous can name it)</span></label>
         <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={150} placeholder="e.g. The Story of the Jamaican Dollar" /></div>
       <Counts {...{ nq, ns, setNq, setNs, level, setLevel }} />
       {err && <div className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{err}</div>}
-      <button className="btn-green w-full py-3" disabled={busy || !file}>{busy ? "FinBuddy is reading and writing questions… (up to a minute)" : "✨ Make the lesson + quiz"}</button>
+      <button className="btn-green w-full py-3" disabled={busy || !file}>{busy ? "Casheous is reading and writing questions… (up to a minute)" : "✨ Make the lesson + quiz"}</button>
     </form>
   );
 }

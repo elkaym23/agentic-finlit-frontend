@@ -49,7 +49,7 @@ export default function QuizEditor() {
   return (
     <div className="mx-auto max-w-3xl space-y-5 pb-24">
       <Link to="/library" className="text-sm font-semibold text-ink-mute hover:text-ink">← Lessons & Quizzes</Link>
-      {sp.get("new") && <div className="rounded-3xl bg-tile-mint p-4 text-sm">✨ <b>FinBuddy wrote {items.length} questions.</b> Check each one, fix anything that's off, then save and assign it.</div>}
+      {sp.get("new") && <div className="rounded-3xl bg-tile-mint p-4 text-sm">✨ <b>Casheous wrote {items.length} questions.</b> Check each one, fix anything that's off, then save and assign it.</div>}
 
       <div className="rounded-4xl bg-[#f7f6fb] p-5">
         <label className="label">Quiz title</label>

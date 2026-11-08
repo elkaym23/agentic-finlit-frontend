@@ -24,7 +24,7 @@ export default function LessonEditor() {
   const upd = (k: number, p: Partial<{ title: string; content: string }>) => setSecs(secs.map((s, i) => (i === k ? { ...s, ...p } : s)));
   const save = async () => {
     setSaving(true); setMsg(null);
-    try { await api.put(`/api/teacher/lessons/${L.lesson_id}`, { title, description: desc || null, level, sections: secs }); setMsg({ ok: true, t: "Saved ✓ FinBuddy will use the new text." }); }
+    try { await api.put(`/api/teacher/lessons/${L.lesson_id}`, { title, description: desc || null, level, sections: secs }); setMsg({ ok: true, t: "Saved ✓ Casheous will use the new text." }); }
     catch (e: any) { setMsg({ ok: false, t: e.message }); } finally { setSaving(false); }
   };
 

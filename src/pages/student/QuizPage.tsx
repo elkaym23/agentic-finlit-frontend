@@ -22,7 +22,7 @@ export default function QuizPage() {
   if (busy) return (
     <div className="flex flex-col items-center gap-4 py-20 text-center">
       <div className="animate-bob"><Mascot size={120} mood="think" /></div>
-      <div className="text-xl font-bold">FinBuddy is checking your answers…</div>
+      <div className="text-xl font-bold">Casheous is checking your answers…</div>
       <div className="muted">This only takes a few seconds.</div>
     </div>
   );
@@ -89,7 +89,7 @@ export default function QuizPage() {
           </div>
         ) : (
           <textarea className="input mt-5 min-h-[140px] resize-y" value={val} onChange={(e) => set(e.target.value)}
-                    placeholder="Explain in your own words. Full sentences help FinBuddy understand you!" maxLength={1500} />
+                    placeholder="Explain in your own words. Full sentences help Casheous understand you!" maxLength={1500} />
         )}
       </div>
 

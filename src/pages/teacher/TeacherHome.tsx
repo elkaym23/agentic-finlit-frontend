@@ -77,7 +77,7 @@ export default function TeacherHome() {
       <aside className="space-y-4">
         <div className="rounded-4xl bg-ink p-5 text-white">
           <div className="flex items-center gap-3"><Mascot size={60} /><div><div className="font-bold">Quiz from any document</div><div className="text-sm text-white/70">PDF, Word or text</div></div></div>
-          <p className="mt-3 text-sm text-white/80">Upload a reading and FinBuddy turns it into a lesson and a quiz you can edit, then assign it to a class.</p>
+          <p className="mt-3 text-sm text-white/80">Upload a reading and Casheous turns it into a lesson and a quiz you can edit, then assign it to a class.</p>
           <Link to="/library" className="btn-gold mt-4 w-full">Go to Lessons & Quizzes</Link>
         </div>
         <div className="rounded-4xl border border-black/5 p-5">
