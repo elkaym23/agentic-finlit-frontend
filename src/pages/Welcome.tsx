@@ -37,9 +37,11 @@ export default function Welcome() {
       {/* hero */}
       <div className="relative">
         <div className="chip mb-5 bg-white py-2 text-sm shadow-card">
-          <span className="flex h-3 w-5 overflow-hidden rounded-sm">
-            <span className="w-1/3 bg-jam-green" /><span className="w-1/3 bg-jam-gold" /><span className="w-1/3 bg-jam-black" />
-          </span>
+          <svg viewBox="0 0 12 6" className="h-3.5 w-7 overflow-hidden rounded-[3px]" role="img" aria-label="Flag of Jamaica">
+            <rect width="12" height="6" fill="#009b3a" />
+            <path d="M0 0 L6 3 L0 6 Z M12 0 L6 3 L12 6 Z" fill="#000" />
+            <path d="M0 0 L12 6 M12 0 L0 6" stroke="#fed100" strokeWidth="1" />
+          </svg>
           Made for Jamaican classrooms
         </div>
         <h1 className="text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
